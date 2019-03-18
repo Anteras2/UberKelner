@@ -1,8 +1,10 @@
 from scripts.__init__ import *
+from scripts.genericfield import GenericField
 
-class Furnace(pygame.sprite.Sprite):
+
+class Furnace(GenericField, pygame.sprite.Sprite):
     def __init__(self, x, y):
-
+        super().__init__(9999)
         # init graphics - do not touch!
         init_graphics(self, x, y, "furnace")
 
