@@ -7,12 +7,19 @@ from scripts.__init__ import *
 import pygame
 from pygame.locals import *
 
+
+
 class Waiter(pygame.sprite.Sprite):
 
     def __init__(self, matrix_fields, num_tables, num_furnaces):
 
         if num_tables + num_furnaces + 1 > N*N:
             print("Not enough space in restaurant for objects!")
+
+        self.move_matrix = Matrix(N, N)
+        self.matrix_x = 0
+        self.matrix_y = 0
+        self.move_matrix.insert_object(self, self.matrix_x, self.matrix_y)
 
         # init restaurant map - integer matrix with ids of objects
         self.restaurant = [[0] * N for _ in range(N)]
@@ -42,6 +49,8 @@ class Waiter(pygame.sprite.Sprite):
             self.restaurant[matrix_fields[i + counter][0]][matrix_fields[i + counter][1]] = "furnace"
             self.dining_tables.append(Furnace(matrix_fields[i + counter][0], matrix_fields[i + counter][1]))
 
+    def __repr__(self):
+        return 'K'
     # movement procedure - change position on defined difference of coordinates
     def move(self, delta_x, delta_y):
         new_x = self.x + delta_x
@@ -64,12 +73,28 @@ class Waiter(pygame.sprite.Sprite):
         # list of events on keys:
         if key == K_RIGHT:
             self.move(1, 0)
+            if self.move_matrix.insert_object(self, self.matrix_x , self.matrix_y + 1, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_y += 1
+            print(self.move_matrix)
         elif key == K_LEFT:
             self.move(-1, 0)
+            if self.move_matrix.insert_object(self, self.matrix_x , self.matrix_y - 1, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_y -= 1
+            print(self.move_matrix)
         elif key == K_DOWN:
             self.move(0, 1)
+            if self.move_matrix.insert_object(self, self.matrix_x + 1, self.matrix_y, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_x += 1
+            print(self.move_matrix)
         elif key == K_UP:
             self.move(0, -1)
+            if self.move_matrix.insert_object(self, self.matrix_x - 1, self.matrix_y, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_x -= 1
+            print(self.move_matrix)
 
         # change the environment: - REPAIR!
         # update statuses of restaurant objects
@@ -86,6 +111,7 @@ class Waiter(pygame.sprite.Sprite):
         for i in self.restaurant:
             print(*i)
         print("---------------------------")
+
 
     def example(self):
         # example usage of matrix, for development purpose only

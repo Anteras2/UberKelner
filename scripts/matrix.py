@@ -29,23 +29,30 @@ class Matrix:
     def insert_object(self, object_to_insert, row, column, debug=False):
         #wklada obiekt na podane miejsce do macierzy
         try:
+            if row < 0 or column < 0:
+                return False
+
             self.matrix[row][column] = object_to_insert
 
             if debug:
                 print('Added {0} to matrix[{1}][{2}]'.format(object_to_insert, row, column))
+                return True
         except IndexError:
             print("ERROR: Index out of bounds. Inserting object is not possible.")
+            return False
 
     def delete_object(self, row, column, debug=False):
-        #usuwa obiekt i zastepuje go 0, do poprawy
         try:
             deleted_object = self.matrix[row][column]
             self.matrix[row][column] = self.fill
 
             if debug:
                 print('Deleted {0} from matrix[{1}][{2}]'.format(deleted_object, row, column))
+
+            return True
         except IndexError:
             print('ERROR: Index out of bounds. Deleting object is not possible.')
+            return False
 
     def objects_to_list(self, wanted_object):
         #zwraca liste obiektow i ich miejsc w macierzy, porownywany jest typ obiektu, nie jego wartosc
