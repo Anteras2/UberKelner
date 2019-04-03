@@ -1,6 +1,7 @@
 # furnace object class:
 
 from scripts.__init__ import *
+from scripts.genericfield import GenericField
 
 
 # init of object with sprite - pygames requirement
@@ -17,6 +18,7 @@ class Furnace(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         # init graphics with object's sprite - do not touch!
+
         init_graphics(self, x, y, "furnace")
 
         # real coordinates of object

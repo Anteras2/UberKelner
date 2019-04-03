@@ -20,6 +20,7 @@ class Matrix:
         # return content
         return '\n'.join(table) + '\n' + "------------------------------------"
 
+
     # insert object on its own coordinates
     def simple_insert(self, object_to_insert):
         # if space in matrix is empty and new coordinates are empty

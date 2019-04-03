@@ -8,6 +8,8 @@ import sys
 from pygame.locals import *
 
 
+
+
 # init of object with sprite - pygames requirement
 class Waiter (pygame.sprite.Sprite):
 
@@ -26,8 +28,10 @@ class Waiter (pygame.sprite.Sprite):
             print("Not enough space in restaurant for objects!")
             sys.exit("N-space overflow")
 
+
         # init restaurant - matrix of objects
         self.restaurant = Matrix(N, N)
+
 
         # set random coordinates of agent
         self.x = matrix_fields[0][0]
@@ -56,7 +60,11 @@ class Waiter (pygame.sprite.Sprite):
         for i in range(num_furnaces):
             self.restaurant.simple_insert(Furnace(matrix_fields[i + counter][0], matrix_fields[i + counter][1]))
 
+
     # movement procedure - change position of agent on defined difference of coordinates
+    def __repr__(self):
+        return 'K'
+    # movement procedure - change position on defined difference of coordinates
     def move(self, delta_x, delta_y):
         # temporarily set new coordinates
         new_x = self.x + delta_x
@@ -81,20 +89,38 @@ class Waiter (pygame.sprite.Sprite):
         # list of events on keys:
         if key == K_RIGHT:
             self.move(1, 0)
+            if self.move_matrix.insert_object(self, self.matrix_x , self.matrix_y + 1, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_y += 1
+            print(self.move_matrix)
         elif key == K_LEFT:
             self.move(-1, 0)
+            if self.move_matrix.insert_object(self, self.matrix_x , self.matrix_y - 1, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_y -= 1
+            print(self.move_matrix)
         elif key == K_DOWN:
             self.move(0, 1)
+            if self.move_matrix.insert_object(self, self.matrix_x + 1, self.matrix_y, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_x += 1
+            print(self.move_matrix)
         elif key == K_UP:
             self.move(0, -1)
+            if self.move_matrix.insert_object(self, self.matrix_x - 1, self.matrix_y, debug=True):
+                self.move_matrix.delete_object(self.matrix_x, self.matrix_y)
+                self.matrix_x -= 1
+            print(self.move_matrix)
 
         # DIAGRAM SEQUENCE HERE! - ADD IN NEXT VERSION!
         # if if if if
 
         # change the environment: - REPAIR!
+
         # update statuses of all restaurant objects
         for _ in self.restaurant.all_objects_to_list():
             _.next_round()
 
         # show me status of simulation - for development purpose only
         print(self.restaurant)
+
