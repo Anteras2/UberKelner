@@ -5,38 +5,51 @@ from scripts.waiter import *
 import sys
 import pygame
 from pygame.locals import *
+import datetime
+
 
 if __name__ == '__main__':
 
-    # init random coordinates
+    # init list of variables, common for all simulations:
+    # random coordinates
     random_coordinates = create_random_coordinates()
+    # number of tables
+    num_tables = 8
+    # number of furnaces
+    num_furnaces = 2
+
+    # save state of simulation to file
+    with open("simulation_log.txt", "a") as myfile:
+        myfile.write(str(datetime.datetime.now()) + '\t' + str(num_tables) + '\t' +
+                     str(num_furnaces) + '\t' + str(random_coordinates) + '\n')
 
     # waiters - agents of simulation, owning matrices of restaurants
     # one special playable waiter
-    Uber = Waiter(random_coordinates, 8, 2)
+    Uber = Waiter(random_coordinates, num_tables, num_furnaces)
 
     # list of all sprites for graphics window to draw
     all_sprites = pygame.sprite.Group()
 
-    # add sprites to draw to the list
+    # add waiter to sprites list
     all_sprites.add(Uber)
-    for table in Uber.dining_tables:
-        all_sprites.add(table)
-    for furnace in Uber.furnaces:
-        all_sprites.add(furnace)
+    # add all tables and furnaces to sprites list
+    for _ in Uber.restaurant.all_objects_to_list():
+        all_sprites.add(_)
 
-    # main game loop
+    # main game loop:
+    # clear event log of game
     pygame.event.clear()
-    while True:  # the main game loop
+    # for eternity:
+    while True:
         # wait for key pressed:
         for event in pygame.event.get():
-            # end of main loop: close simulation
+            # if [x] in right upper corner was clicked, exit game
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            # after key was pressed:
+            # or after key was pressed:
             elif event.type == KEYUP:
-                # exit simulation:
+                # exit simulation anyway:
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
@@ -52,6 +65,6 @@ if __name__ == '__main__':
         DISPLAYSURF.fill(WHITE)
         # draw sprites
         all_sprites.draw(DISPLAYSURF)
-        # Refresh Screen
+        # refresh Screen
         pygame.display.flip()
         fpsClock.tick(FPS)

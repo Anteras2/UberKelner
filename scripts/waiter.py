@@ -1,73 +1,89 @@
-# kelner object
+# agent object class:
 
 from scripts.matrix import *
 from scripts.dinning_table import *
 from scripts.furnace import *
-from scripts.__init__ import *
 import pygame
+import sys
 from pygame.locals import *
 
 
 
-class Waiter(pygame.sprite.Sprite):
 
+# init of object with sprite - pygames requirement
+class Waiter (pygame.sprite.Sprite):
+
+    # procedure of printing object properties when called by matrix
+    def __repr__(self):
+        return "Waiter"
+
+    # initialize agent with list of coordinates for tables and furnaces and their number
     def __init__(self, matrix_fields, num_tables, num_furnaces):
 
+        # call init of parent class
+        pygame.sprite.Sprite.__init__(self)
+
+        # check if there is enough space for everyting in simulation
         if num_tables + num_furnaces + 1 > N*N:
             print("Not enough space in restaurant for objects!")
+            sys.exit("N-space overflow")
 
-        self.move_matrix = Matrix(N, N)
-        self.matrix_x = 0
-        self.matrix_y = 0
-        self.move_matrix.insert_object(self, self.matrix_x, self.matrix_y)
 
-        # init restaurant map - integer matrix with ids of objects
-        self.restaurant = [[0] * N for _ in range(N)]
+        # init restaurant - matrix of objects
+        self.restaurant = Matrix(N, N)
 
-        # data lists containing objects of restaurant
-        self.dining_tables = []
-        self.furnaces = []
 
-        # set random coordinates of object
+        # set random coordinates of agent
         self.x = matrix_fields[0][0]
         self.y = matrix_fields[0][1]
 
-        # init graphics - do not touch!
+        # init graphics with object's sprite - do not touch!
         init_graphics(self, self.x, self.y, "waiter")
 
-        # add objects to restaurant - creates waiters, tables and furnaces basing on random positions in the matrix
-        # objects have coordinates like in matrix (0..N, 0..N)
+        # add objects to restaurant - creates tables and furnaces basing on random positions in the matrix
+        # objects have coordinates like in matrix (0..N, 0..N):
 
+        # add ghostwaiter to restaurant to mark waiters position
+        self.restaurant.insert('Waiter', self.x, self.y)
+
+        # counter counts number of used coordinates, so no object will occupy the same space in simulation
         counter = 1
-        for i in range(num_tables):
-            self.restaurant[matrix_fields[i + counter][0]][matrix_fields[i + counter][1]] = "dinner_table"
-            self.dining_tables.append(Dinning_table(matrix_fields[i + counter][0], matrix_fields[i + counter][1]))
 
+        # add tables
+        for i in range(num_tables):
+            self.restaurant.simple_insert(DinningTable(matrix_fields[i + counter][0], matrix_fields[i + counter][1]))
+
+        # increase counter with number of used coordinates
         counter += num_tables
 
+        # add furnaces
         for i in range(num_furnaces):
-            self.restaurant[matrix_fields[i + counter][0]][matrix_fields[i + counter][1]] = "furnace"
-            self.dining_tables.append(Furnace(matrix_fields[i + counter][0], matrix_fields[i + counter][1]))
+            self.restaurant.simple_insert(Furnace(matrix_fields[i + counter][0], matrix_fields[i + counter][1]))
 
+
+    # movement procedure - change position of agent on defined difference of coordinates
     def __repr__(self):
         return 'K'
     # movement procedure - change position on defined difference of coordinates
     def move(self, delta_x, delta_y):
+        # temporarily set new coordinates
         new_x = self.x + delta_x
         new_y = self.y + delta_y
-        # if movement is within restaurant borders
-        if new_x in range(0, N) and new_y in range(0, N):
-            # and the field is empty
-            if self.restaurant[new_x][new_y] == 0:
-                # set new coordinates
-                self.x = new_x
-                self.y = new_y
-                # update waiter sprite localization after changes
-                self.rect.x = self.x * blocksize
-                self.rect.y = self.y * blocksize
 
-            # if restaurant field is not empty, analize the environment - take dishes or order - REPAIR
-            # else:
+        # if movement is allowed by matrix, within restaurant borders and the field is empty:
+        if self.restaurant.move(self.x, self.y, new_x, new_y):
+
+            # set new coordinates
+            self.x = new_x
+            self.y = new_y
+
+            # update waiter sprite localization after changes
+            self.rect.x = self.x * blocksize
+            self.rect.y = self.y * blocksize
+
+        # if restaurant field is not empty, analize the environment - take dishes or order - REPAIR
+        # add rules here!
+        # else:
 
     def next_round(self, key):
         # list of events on keys:
@@ -96,30 +112,15 @@ class Waiter(pygame.sprite.Sprite):
                 self.matrix_x -= 1
             print(self.move_matrix)
 
+        # DIAGRAM SEQUENCE HERE! - ADD IN NEXT VERSION!
+        # if if if if
+
         # change the environment: - REPAIR!
-        # update statuses of restaurant objects
-        for table in self.dining_tables:
-            table.next_round()
-        for furnace in self.furnaces:
-            furnace.next_round()
 
-        # show me status of simulation
-        #self.print_restaurant()
+        # update statuses of all restaurant objects
+        for _ in self.restaurant.all_objects_to_list():
+            _.next_round()
 
-    # print matrix of statuses in restaurant
-    def print_restaurant(self):
-        for i in self.restaurant:
-            print(*i)
-        print("---------------------------")
+        # show me status of simulation - for development purpose only
+        print(self.restaurant)
 
-
-    def example(self):
-        # example usage of matrix, for development purpose only
-        self.space = Matrix(N, N)
-        self.space.print_matrix()
-        self.space.insert_object('asdasd', 2, 4, debug=True)
-        self.space.insert_object(Matrix(2, 2, fill=5), 1, 1)
-        self.space.print_matrix()
-        print(self.space.objects_to_list('asdasd'))
-        self.space.delete_object(1, 1, debug=True)
-        self.space.print_matrix()

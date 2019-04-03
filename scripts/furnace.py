@@ -1,11 +1,24 @@
+# furnace object class:
+
 from scripts.__init__ import *
 from scripts.genericfield import GenericField
 
 
-class Furnace(GenericField, pygame.sprite.Sprite):
+# init of object with sprite - pygames requirement
+class Furnace(pygame.sprite.Sprite):
+
+    # procedure of printing object properties when called by matrix
+    def __repr__(self):
+        return "Furnace"
+
+    # init of object with coordinates in simulation
     def __init__(self, x, y):
-        super().__init__(9999)
-        # init graphics - do not touch!
+
+        # call init of parent class
+        pygame.sprite.Sprite.__init__(self)
+
+        # init graphics with object's sprite - do not touch!
+
         init_graphics(self, x, y, "furnace")
 
         # real coordinates of object
@@ -16,6 +29,8 @@ class Furnace(GenericField, pygame.sprite.Sprite):
         self.orderedDishes = {}
         self.readyDishes = {}
 
+        # how long does this furnace cook?
+        # for ai learning purpose - waiter has to minimize time in restaurant
         self.time = 0
 
     def next_round(self):

@@ -1,11 +1,25 @@
+# table object class:
+
 from scripts.__init__ import *
 from scripts.genericfield import GenericField
 
 
-class Dinning_table(GenericField, pygame.sprite.Sprite):
+
+# init of object with sprite - pygames requirement
+class DinningTable(pygame.sprite.Sprite):
+
+    # procedure of printing object properties when called by matrix
+    def __repr__(self):
+        return "Dinning Table"
+
+    # init of object with coordinates in simulation
     def __init__(self, x, y):
-        super().__init__(9999)
-        # init graphics - do not touch!
+
+        # call init of parent class
+        pygame.sprite.Sprite.__init__(self)
+
+        # init graphics with object's sprite - do not touch!
+
         init_graphics(self, x, y, "dinner_table")
 
         # real coordinates of object

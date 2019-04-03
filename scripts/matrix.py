@@ -1,77 +1,90 @@
+# matrix object class:
 
-# matrix object class
 import copy
 
+
 class Matrix:
-    #konstruktor, ustawia ilosc szeregow i kolumn, mozna rowniez ustawic co ma byc podstawowym zapelnieniem macierzy, jezeli nie zmienione to zero
-    def __init__(self, rows, columns, fill=0):
+    # matrix init, set rows and columns, fill is optional - 0 by default
+    def __init__(self, rows, columns, fill="0"):
         self.fill = fill
-        self.matrix = [[self.fill for x in range(columns)] for y in range(rows)]
+        self.matrix = [[self.fill for _ in range(columns)] for _ in range(rows)]
 
+    # print matrix content beautified when calling print(matrix)
     def __repr__(self):
-        #funkcja repr pozwala na ladne drukowanie macierzy, mozna zrobic print(Matrx) i zobaczymy ladna macierz
         s = [[str(e) for e in row] for row in self.matrix]
+        # transpose rows
+        s = list(map(list, zip(*s)))
         lens = [max(map(len, col)) for col in zip(*s)]
         fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
         table = [fmt.format(*row) for row in s]
-        represent = '\n'.join(table)
-        return represent
+        # return content
+        return '\n'.join(table) + '\n' + "------------------------------------"
 
-    def print_matrix(self):
-        #zbedne gdy mamy repr ale nadal dodalem, mozna wydrukowac macierz metoda, jak kto woli
-        s = [[str(e) for e in row] for row in self.matrix]
-        lens = [max(map(len, col)) for col in zip(*s)]
-        fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
-        table = [fmt.format(*row) for row in s]
-        print('\n'.join(table))
-        print("------------------------------------")
 
-    def insert_object(self, object_to_insert, row, column, debug=False):
-        #wklada obiekt na podane miejsce do macierzy
-        try:
-            if row < 0 or column < 0:
-                return False
-
-            self.matrix[row][column] = object_to_insert
-
-            if debug:
-                print('Added {0} to matrix[{1}][{2}]'.format(object_to_insert, row, column))
-                return True
-        except IndexError:
-            print("ERROR: Index out of bounds. Inserting object is not possible.")
-            return False
-
-    def delete_object(self, row, column, debug=False):
-        try:
-            deleted_object = self.matrix[row][column]
-            self.matrix[row][column] = self.fill
-
-            if debug:
-                print('Deleted {0} from matrix[{1}][{2}]'.format(deleted_object, row, column))
-
+    # insert object on its own coordinates
+    def simple_insert(self, object_to_insert):
+        # if space in matrix is empty and new coordinates are empty
+        if self.is_empty(object_to_insert.x, object_to_insert.y):
+            # insert object to matrix
+            self.matrix[object_to_insert.x][object_to_insert.y] = object_to_insert
             return True
-        except IndexError:
-            print('ERROR: Index out of bounds. Deleting object is not possible.')
+        else:
             return False
 
+    # insert object on other coordinates than its own
+    def insert(self, object_to_insert, x, y):
+        if self.is_empty(x, y):
+            self.matrix[x][y] = object_to_insert
+            return True
+        else:
+            return False
+
+    # remove object and set fill instead
+    def delete_object(self, x, y):
+        if not self.is_empty(x, y):
+            self.matrix[x][y] = self.fill
+            return True
+        else:
+            return False
+
+    # move object form coordinates to new one
+    def move(self, x, y, new_x, new_y):
+        # if there is object to move and new space is not occupied
+        if not self.is_empty(x, y) and self.is_empty(new_x, new_y):
+            # move object and fill its previous place
+            self.matrix[new_x][new_y] = self.matrix[x][y]
+            self.matrix[x][y] = self.fill
+            return True
+        else:
+            return False
+
+    # returns list of objects by checking object class type, not content
     def objects_to_list(self, wanted_object):
-        #zwraca liste obiektow i ich miejsc w macierzy, porownywany jest typ obiektu, nie jego wartosc
         list_of_wanted_objects = list()
         for i in range(len(self.matrix)):
             for j in range(len(self.matrix)):
-                if type(self.matrix[i][j]) is type(wanted_object):
-                    list_of_wanted_objects.append((self.matrix[i][j], (i, j)))
-
+                if isinstance(self.matrix[i][j], type(wanted_object)):
+                    list_of_wanted_objects.append((self.matrix[i][j]))
         return list_of_wanted_objects
 
+    # returns list of all objects - better performance of matrix, no double-checking
+    def all_objects_to_list(self):
+        list_of_wanted_objects = list()
+        for i in range(len(self.matrix)):
+            for j in range(len(self.matrix)):
+                if not isinstance(self.matrix[i][j], type(self.fill)) \
+                        and not isinstance(self.matrix[i][j], str):
+                    list_of_wanted_objects.append((self.matrix[i][j]))
+        return list_of_wanted_objects
+
+    # check if coordinates are empty
+    def is_empty(self, x, y):
+        try:
+            return self.matrix[x][y] == self.fill \
+                   and x >= 0 and y >= 0
+        except IndexError:
+            return False
+
+    # return copy of matrix - regular '=' would just set reference to source, not copy the content
     def get_matrix(self):
-        to_return = copy.deepcopy(self.matrix)
-        return to_return
-
-    def get_empty_space_type(self):
-        return self.fill
-
-if __name__ == '__main__':
-    mat = Matrix(30, 30, fill='X')
-    print(mat)
-    print(mat.get_matrix())
+        return copy.deepcopy(self.matrix)
